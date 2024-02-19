@@ -1,15 +1,12 @@
 const User = require('../models/User');
 const Employee = require('../models/Employee');
 const bcrypt = require('bcryptjs');
-const emailValidator = require('email-validator'); 
-
+const emailValidator = require('email-validator');
 
 const validateStringLength = (str, min, max) => str.length >= min && str.length <= max;
-const validateSalary = (salary) => salary > 0;
-
+const validateSalary = salary => salary > 0;
 
 const resolvers = {
-
   Query: {
     async login(_, { username, password }) {
       const user = await User.findOne({ username });
@@ -48,19 +45,19 @@ const resolvers = {
       return newUser;
     },
     async addEmployee(_, { first_name, last_name, email, gender, salary }) {
-// Validate input data
-if (!validateStringLength(first_name, 2, 50) || !validateStringLength(last_name, 2, 50)) {
-  throw new Error('First name and last name must be between 2 and 50 characters');
-}
-if (!emailValidator.validate(email)) {
-  throw new Error('Invalid email format');
-}
-if (!['Male', 'Female', 'Other'].includes(gender)) {
-  throw new Error('Gender must be Male, Female, or Other');
-}
-if (!validateSalary(salary)) {
-  throw new Error('Salary must be positive');
-}
+      // Validate input data
+      if (!validateStringLength(first_name, 2, 50) || !validateStringLength(last_name, 2, 50)) {
+        throw new Error('First name and last name must be between 2 and 50 characters');
+      }
+      if (!emailValidator.validate(email)) {
+        throw new Error('Invalid email format');
+      }
+      if (!['Male', 'Female', 'Other'].includes(gender)) {
+        throw new Error('Gender must be Male, Female, or Other');
+      }
+      if (!validateSalary(salary)) {
+        throw new Error('Salary must be positive');
+      }
 
       const newEmployee = new Employee({ first_name, last_name, email, gender, salary });
       await newEmployee.save();
@@ -72,17 +69,18 @@ if (!validateSalary(salary)) {
         throw new Error('Employee not found');
       }
 
-      // For updates, validate only if the fields are provided
+      // Validate and update fields if provided
       if (email && !emailValidator.validate(email)) {
         throw new Error('Invalid email format');
       }
-      if (first_name && !validateStringLength(first_name, 2, 50) || last_name && !validateStringLength(last_name, 2, 50)) {
+      if ((first_name && !validateStringLength(first_name, 2, 50)) || (last_name && !validateStringLength(last_name, 2, 50))) {
         throw new Error('First name and last name must be between 2 and 50 characters');
       }
       if (salary && !validateSalary(salary)) {
         throw new Error('Salary must be positive');
       }
       
+      // Update employee fields
       employee.first_name = first_name || employee.first_name;
       employee.last_name = last_name || employee.last_name;
       employee.email = email || employee.email;
@@ -99,7 +97,7 @@ if (!validateSalary(salary)) {
       await employee.deleteOne();
       return {
         id: employee.id, 
-        message: `Employee with ID ${employee.id} is successfully deleted.`
+        message: `Employee with ID ${employee.id} is successfully deleted.`,
       };
     },
   },

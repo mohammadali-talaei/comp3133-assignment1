@@ -1,4 +1,4 @@
-// server.js
+require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const mongoose = require('mongoose');
@@ -12,15 +12,23 @@ async function startServer() {
     resolvers,
   });
 
-  await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  try {
+    await apolloServer.start();
+    apolloServer.applyMiddleware({ app });
 
-  mongoose.connect('mongodb://localhost:27017/comp3133_assigment1', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to MongoDB');
 
-  app.listen(4000, () => console.log(`Server running at http://localhost:4000${apolloServer.graphqlPath}`));
+    const PORT = process.env.PORT || 4000;
+    app.listen(PORT, () => 
+      console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`)
+    );
+  } catch (error) {
+    console.error('Server start error:', error);
+  }
 }
 
 startServer();

@@ -1,12 +1,34 @@
-// models/Employee.js
 const mongoose = require('mongoose');
 
-const employeeSchema = new mongoose.Schema({
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  gender: { type: String, required: true },
-  salary: { type: Number, required: true },
+const { Schema, model } = mongoose;
+
+const employeeSchema = new Schema({
+  first_name: {
+    type: String,
+    required: [true, 'First name is required'] 
+  },
+  last_name: {
+    type: String,
+    required: [true, 'Last name is required']
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    match: [/.+\@.+\..+/, 'Please fill a valid email address'] 
+  },
+  gender: {
+    type: String,
+    required: [true, 'Gender is required'],
+    enum: ['Male', 'Female', 'Other']
+  },
+  salary: {
+    type: Number,
+    required: [true, 'Salary is required'],
+    min: [0, 'Salary cannot be negative']
+  }
+}, {
+  timestamps: true
 });
 
-module.exports = mongoose.model('Employee', employeeSchema);
+module.exports = model('Employee', employeeSchema);
